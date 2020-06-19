@@ -313,7 +313,7 @@ end
 
 function draw_atomic(scene::Scene, screen::CairoScreen, primitive::Text)
     ctx = screen.context
-    @get_attribute(primitive, (textsize, color, font, align, rotation, model, justification, lineheight, space))
+    @get_attribute(primitive, (textsize, color, font, rotation, model, space))
 
     txt = to_value(primitive[1])
     position = primitive.attributes[:position][]
@@ -321,22 +321,22 @@ function draw_atomic(scene::Scene, screen::CairoScreen, primitive::Text)
     # use cached glyph info
     glyphlayouts = primitive._glyphlayout[]
 
-    draw_string(scene, ctx, txt, position, glyphlayouts, textsize, color, font, align, rotation, model, justification, lineheight, space)
+    draw_string(scene, ctx, txt, position, glyphlayouts, textsize, color, font, rotation, model,  space)
 
     nothing
 end
 
 
-function draw_string(scene, ctx, strings::AbstractArray, positions::AbstractArray, glyphlayouts, textsize, color, font, align, rotation, model::SMatrix, justification, lineheight, space)
+function draw_string(scene, ctx, strings::AbstractArray, positions::AbstractArray, glyphlayouts, textsize, color, font, rotation, model::SMatrix, space)
 
     # TODO: why is the Ref around model necessary? doesn't broadcast_foreach handle staticarrays matrices?
-    broadcast_foreach(strings, positions, glyphlayouts, textsize, color, font, align, rotation, Ref(model), justification, lineheight, space) do str, pos, glayout, ts, c, f, al, ro, mo, ju, li, sp
+    broadcast_foreach(strings, positions, glyphlayouts, textsize, color, font, rotation, Ref(model), space) do str, pos, glayout, ts, c, f, ro, mo, sp
 
-        draw_string(scene, ctx, str, pos, glayout, ts, c, f, al, ro, mo, ju, li, sp)
+        draw_string(scene, ctx, str, pos, glayout, ts, c, f, ro, mo, sp)
     end
 end
 
-function draw_string(scene, ctx, str::String, position::VecTypes, glyphlayout, textsize, color, font, align, rotation, model, justification, lineheight, space)
+function draw_string(scene, ctx, str::String, position::VecTypes, glyphlayout, textsize, color, font, rotation, model, space)
 
     glyphoffsets, _ = glyphlayout
 
