@@ -384,52 +384,53 @@ function draw_string(scene, ctx, str::String, position::VecTypes, glyphlayout, t
 end
 
 
-function draw_string(scene, ctx, str::String, positions::AbstractArray, glyphlayout, textsize, color, font, rotation, model, space)
+# # draw_string for a single string with multiple positions (per char)
+# function draw_string(scene, ctx, str::String, positions::AbstractArray, glyphlayout, textsize, color, font, rotation, model, space)
 
-    glyphoffsets, _ = glyphlayout
+#     glyphoffsets, _ = glyphlayout
 
-    # calculate the glyph positions and text size relative to screen space
-    if space == :data
-        # in data space, the glyph offsets are just added to the string positions
-        # and then projected
-        glyphpositions = [project_position(
-            scene,
-            to_ndim(Point3f0, pos, 0) .+ goffset,
-            Mat4f0(I)) for (pos, goffset) in zip(positions, glyphoffsets)]
-        # and the scale is projected
-        scale = project_scale(scene, textsize, Mat4f0(I))
-    elseif space == :screen
-        # in screen space, the glyph offsets are added after projecting
-        # the string position into screen space
-        glyphpositions = [project_position(scene, pos, Mat4f0(I)) .+ p3_to_p2(goffset) .* (1, -1) for (pos, goffset) in zip(positions, glyphoffsets)] # flip for Cairo
-        # and the scale is just taken as is
-        scale = length(textsize) == 2 ? textsize : SVector(textsize, textsize)
-    end
+#     # calculate the glyph positions and text size relative to screen space
+#     if space == :data
+#         # in data space, the glyph offsets are just added to the string positions
+#         # and then projected
+#         glyphpositions = [project_position(
+#             scene,
+#             to_ndim(Point3f0, pos, 0) .+ goffset,
+#             Mat4f0(I)) for (pos, goffset) in zip(positions, glyphoffsets)]
+#         # and the scale is projected
+#         scale = project_scale(scene, textsize, Mat4f0(I))
+#     elseif space == :screen
+#         # in screen space, the glyph offsets are added after projecting
+#         # the string position into screen space
+#         glyphpositions = [project_position(scene, pos, Mat4f0(I)) .+ p3_to_p2(goffset) .* (1, -1) for (pos, goffset) in zip(positions, glyphoffsets)] # flip for Cairo
+#         # and the scale is just taken as is
+#         scale = length(textsize) == 2 ? textsize : SVector(textsize, textsize)
+#     end
 
 
-    Cairo.save(ctx)
+#     Cairo.save(ctx)
 
-    cairoface = set_ft_font(ctx, font)
-    Cairo.set_source_rgba(ctx, rgbatuple(color)...)
-    set_font_matrix(ctx, scale_matrix(scale...))
+#     cairoface = set_ft_font(ctx, font)
+#     Cairo.set_source_rgba(ctx, rgbatuple(color)...)
+#     set_font_matrix(ctx, scale_matrix(scale...))
 
-    for (gpos, char) in zip(glyphpositions, str)
+#     for (gpos, char) in zip(glyphpositions, str)
 
-        char in ('\r', '\n') && continue
+#         char in ('\r', '\n') && continue
 
-        Cairo.save(ctx)
-        Cairo.move_to(ctx, gpos...)
-        # TODO this only works in 2d
-        Cairo.rotate(ctx, to_2d_rotation(rotation))
+#         Cairo.save(ctx)
+#         Cairo.move_to(ctx, gpos...)
+#         # TODO this only works in 2d
+#         Cairo.rotate(ctx, to_2d_rotation(rotation))
 
-        Cairo.show_text(ctx, string(char))
-        Cairo.restore(ctx)
-    end
+#         Cairo.show_text(ctx, string(char))
+#         Cairo.restore(ctx)
+#     end
 
-    cairo_font_face_destroy(cairoface)
+#     cairo_font_face_destroy(cairoface)
 
-    Cairo.restore(ctx)
-end
+#     Cairo.restore(ctx)
+# end
 
 
 ################################################################################
