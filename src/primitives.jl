@@ -304,7 +304,7 @@ end
 ################################################################################
 
 function p3_to_p2(p::Point3{T}) where T
-    if p[3] == 0
+    if p[3] == 0 || isnan(p[3])
         Point2{T}(p[1:2]...)
     else
         error("Can't reduce Point3 to Point2 with nonzero third component $(p[3]).")
@@ -338,7 +338,7 @@ end
 
 function draw_string(scene, ctx, str::String, position::VecTypes, glyphlayout, textsize, color, font, rotation, model, space)
 
-    glyphoffsets, _ = glyphlayout
+    glyphoffsets = glyphlayout.origins
 
     # calculate the glyph positions and text size relative to screen space
     if space == :data
