@@ -148,11 +148,13 @@ function cairo_draw(screen::CairoScreen, scene::Scene)
     sort!(allplots, by = zvalue)
 
     for p in allplots
-        Cairo.save(screen.context)
-        parentscene = AbstractPlotting.parent_scene(p)
-        prepare_for_scene(screen, parentscene)
-        draw_plot(parentscene, screen, p)
-        Cairo.restore(screen.context)
+        if to_value(get(p, :visible, true))
+            Cairo.save(screen.context)
+            parentscene = AbstractPlotting.parent_scene(p)
+            prepare_for_scene(screen, parentscene)
+            draw_plot(parentscene, screen, p)
+            Cairo.restore(screen.context)
+        end
     end
     # draw_plot(screen, scene)
     return
