@@ -143,11 +143,15 @@ function cairo_draw(screen::CairoScreen, scene::Scene)
 
     allplots = flattened(scene)
 
+    zvalue(p) = AbstractPlotting.transformationmatrix(p)[][3, 4]
+    
+    sort!(allplots, by = zvalue)
+
     for p in allplots
-        println(typeof(p))
         Cairo.save(screen.context)
-        draw_plot(screen, AbstractPlotting.parent_scene(p))
-        draw_plot(scene, screen, p)
+        parentscene = AbstractPlotting.parent_scene(p)
+        prepare_for_scene(screen, parentscene)
+        draw_plot(parentscene, screen, p)
         Cairo.restore(screen.context)
     end
     # draw_plot(screen, scene)
@@ -166,7 +170,7 @@ function flattened(scene, plots)
     append!(plots, flattened(scene))
 end
 
-function draw_plot(screen::CairoScreen, scene::Scene)
+function prepare_for_scene(screen::CairoScreen, scene::Scene)
 
     # get the root area to correct for its pixel size when translating
     root_area = AbstractPlotting.root(scene).px_area[]
@@ -187,8 +191,8 @@ function draw_plot(screen::CairoScreen, scene::Scene)
     Cairo.translate(screen.context, scene_x_origin, top_offset)
 
     # clip the scene to its pixelarea
-    # Cairo.rectangle(screen.context, 0, 0, widths(scene_area)...)
-    # Cairo.clip(screen.context)
+    Cairo.rectangle(screen.context, 0, 0, widths(scene_area)...)
+    Cairo.clip(screen.context)
 
     # for elem in scene.plots
     #     if to_value(get(elem, :visible, true))
