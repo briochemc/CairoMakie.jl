@@ -143,8 +143,8 @@ function cairo_draw(screen::CairoScreen, scene::Scene)
 
     allplots = flattened(scene)
 
-    zvalue(p) = AbstractPlotting.transformationmatrix(p)[][3, 4]
-    
+    zvalue(p) = AbstractPlotting.translation(p)[][3]
+
     sort!(allplots, by = zvalue)
 
     for p in allplots
