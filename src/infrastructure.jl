@@ -140,10 +140,31 @@ to_mime(x::CairoBackend) = to_mime(x.typ)
 function cairo_draw(screen::CairoScreen, scene::Scene)
     AbstractPlotting.update!(scene)
     draw_background(screen, scene)
-    draw_plot(screen, scene)
+
+    allplots = flattened(scene)
+
+    for p in allplots
+        println(typeof(p))
+        Cairo.save(screen.context)
+        draw_plot(screen, AbstractPlotting.parent_scene(p))
+        draw_plot(scene, screen, p)
+        Cairo.restore(screen.context)
+    end
+    # draw_plot(screen, scene)
     return
 end
 
+function flattened(scene)
+    plots = scene.plots
+    for c in scene.children
+        flattened(c, plots)
+    end
+    plots
+end
+
+function flattened(scene, plots)
+    append!(plots, flattened(scene))
+end
 
 function draw_plot(screen::CairoScreen, scene::Scene)
 
@@ -155,7 +176,7 @@ function draw_plot(screen::CairoScreen, scene::Scene)
     scene_height = widths(scene_area)[2]
     scene_x_origin, scene_y_origin = scene_area.origin
 
-    Cairo.save(screen.context)
+    # Cairo.save(screen.context)
 
     # we need to translate x by the origin, so distance from the left
     # but y by the distance from the top, which is not the origin, but can
@@ -166,19 +187,19 @@ function draw_plot(screen::CairoScreen, scene::Scene)
     Cairo.translate(screen.context, scene_x_origin, top_offset)
 
     # clip the scene to its pixelarea
-    Cairo.rectangle(screen.context, 0, 0, widths(scene_area)...)
-    Cairo.clip(screen.context)
+    # Cairo.rectangle(screen.context, 0, 0, widths(scene_area)...)
+    # Cairo.clip(screen.context)
 
-    for elem in scene.plots
-        if to_value(get(elem, :visible, true))
-             draw_plot(scene, screen, elem)
-        end
-    end
-    Cairo.restore(screen.context)
+    # for elem in scene.plots
+    #     if to_value(get(elem, :visible, true))
+    #          draw_plot(scene, screen, elem)
+    #     end
+    # end
+    # Cairo.restore(screen.context)
 
-    for child in scene.children
-        draw_plot(screen, child)
-    end
+    # for child in scene.children
+    #     draw_plot(screen, child)
+    # end
 
     return
 end
